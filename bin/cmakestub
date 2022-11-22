@@ -1,0 +1,81 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const path = require('path'),
+    fs = require('fs');
+
+const filter = ['.cpp', '.h', '.hpp'];
+
+function endsWithAny(filename, filter) {
+  for (let i = 0; i < filter.length; i++)
+    if (filename.endsWith(filter[i]))
+      return true;
+
+  return false;
+}
+
+function findCppAndHeaderFiles(startPath, isSubdirectory) {
+  if (!fs.existsSync(startPath))
+    return [];
+
+  let results = [];
+
+  const files = fs.readdirSync(startPath);
+  for (let i = 0; i < files.length; i++) {
+    const filename = path.join(startPath, files[i]);
+    const stat = fs.lstatSync(filename);
+    if (stat.isDirectory()) {
+      if (!isSubdirectory && files[i].startsWith('cmake-build'))
+        continue;
+
+      results.push(...findCppAndHeaderFiles(filename, true));
+    } else if (endsWithAny(filename, filter)) {
+      results.push(filename);
+    }
+  }
+
+  return results;
+}
+
+const currentDirectory = process.cwd();
+const projectName = path.basename(currentDirectory);
+const sourceFiles = findCppAndHeaderFiles(currentDirectory, false)
+    .map(p => p.substring(currentDirectory.length + 1));
+const sourceDirectories = [...new Set(sourceFiles.map(p => path.dirname(p)))];
+
+let output = "cmake_minimum_required(VERSION 2.8)\n";
+output += "project(" + projectName + ")\n";
+output += "add_library(" + projectName +" SHARED\n"
+sourceFiles.forEach(p => {
+  output += "  " + p + "\n";
+});
+output += ")\n";
+output += "string(TOLOWER \"${CMAKE_BUILD_TYPE}\" BUILD_TYPE_LOWERCASE)\n";
+output += "if (WIN32)\n";
+output += "  target_compile_definitions(" + projectName + " PRIVATE\n";
+output += "    WIN32\n";
+output += "    _WINDOWS\n";
+output += "    COMPILER_MSVC\n";
+output += "    COMPILER_MSVC32\n";
+output += "  )\n";
+output += "else ()\n";
+output += "  target_compile_definitions(" + projectName + " PRIVATE\n";
+output += "    _LINUX\n";
+output += "    POSIX\n";
+output += "    COMPILER_GCC\n";
+output += "  )\n";
+output += "endif ()\n";
+output += "if (BUILD_TYPE_LOWERCASE STREQUAL \"debug\")\n";
+output += "  target_compile_definitions(" + projectName + " PRIVATE\n";
+output += "    _DEBUG\n";
+output += "    DEBUG\n";
+output += "  )\n";
+output += "endif ()\n";
+output += "target_include_directories(" + projectName + " PRIVATE\n";
+sourceDirectories.forEach(p => {
+  output += "  " + p + "\n";
+});
+output += ")\n";
+
+fs.writeFileSync("CMakeLists.txt", output);

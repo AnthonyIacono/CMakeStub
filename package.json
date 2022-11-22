@@ -1,0 +1,36 @@
+{
+  "name": "cmakestub",
+  "version": "1.0.0",
+  "description": "Generate a CMakeLists.txt file with just enough information to make CLion auto-complete useful.",
+  "main": "./lib/cmakestub",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/AnthonyIacono/CMakeStub.git"
+  },
+  "keywords": [
+    "cmake",
+    "stub",
+    "clion"
+  ],
+  "scripts": {
+    "start": "node ./bin/cmakestub"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=12.16"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "bugs": {
+    "url": "https://github.com/AnthonyIacono/CMakeStub/issues"
+  },
+  "license": "MIT",
+  "preferGlobal": true,
+  "bin": {
+    "cmakestub": "./bin/cmakestub"
+  }
+}
