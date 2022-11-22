@@ -1,6 +1,6 @@
 {
   "name": "cmakestub",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate a CMakeLists.txt file with just enough information to make CLion auto-complete useful.",
   "main": "./lib/cmakestub",
   "repository": {

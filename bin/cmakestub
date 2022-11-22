@@ -44,6 +44,11 @@ const sourceFiles = findCppAndHeaderFiles(currentDirectory, false)
     .map(p => p.substring(currentDirectory.length + 1));
 const sourceDirectories = [...new Set(sourceFiles.map(p => path.dirname(p)))];
 
+if (sourceFiles.length === 0 || sourceDirectories.length === 0) {
+  console.error("Unable to find any source files!");
+  process.exit(1);
+}
+
 let output = "cmake_minimum_required(VERSION 2.8)\n";
 output += "project(" + projectName + ")\n";
 output += "add_library(" + projectName +" SHARED\n"
